@@ -4,5 +4,5 @@
 # Database files
 *.db
 
-# Credentials file
-credentials.py
+# JSON files
+*.json
