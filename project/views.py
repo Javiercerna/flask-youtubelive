@@ -4,7 +4,8 @@ from flask import url_for, redirect, render_template, \
 import httplib2
 from apiclient import discovery
 from oauth2client import client
-
+from youtubelive_api import getUploadedVideos, \
+                     createTemplateFromUploadedVideos
 from project import app, db
 from project.models import User
 import os
@@ -20,13 +21,14 @@ def mainInterface():
     else:
         http_auth = credentials.authorize(httplib2.Http())
         youtube = discovery.build('youtube','v3',http_auth)
-        return 'Youtube access granted'
+        uploaded_videos = getUploadedVideos(youtube)
+        return createTemplateFromUploadedVideos(uploaded_videos)
 
 @app.route('/oauth2callback/')
 def oauth2callback():
     flow = client.flow_from_clientsecrets(
         'project/client_secrets.json',
-        scope='https://www.googleapis.com/auth/youtube.readonly',
+        scope='https://www.googleapis.com/auth/youtube',
         redirect_uri=url_for('oauth2callback',_external=True))
     if ('code' not in request.args):
         auth_uri = flow.step1_get_authorize_url()
