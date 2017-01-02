@@ -4,8 +4,8 @@ from flask import url_for, redirect, render_template, \
 import httplib2
 from apiclient import discovery
 from oauth2client import client
-from youtubelive_api import createBroadcast, getAllLiveStreams, \
-                     getLiveStream1080p, bindBroadcast
+from youtubelive_api import getOrCreateBroadcastExample, getAllLiveStreams, \
+                     getLiveStream1080p, bindBroadcast, startBroadcast
 from project import app, db
 from project.models import User
 import os
@@ -21,12 +21,13 @@ def mainInterface():
     else:
         http_auth = credentials.authorize(httplib2.Http())
         youtube = discovery.build('youtube','v3',http_auth)
-        broadcast_id = createBroadcast(youtube)
+        broadcast_id = getOrCreateBroadcastExample(youtube)
         live_streams = getAllLiveStreams(youtube)
         # getLiveStream1080p only works with specific encoder brand
         stream_id = getLiveStream1080p(live_streams)
         if (stream_id != None):
             bindBroadcast(youtube,broadcast_id,stream_id)
+            startBroadcast(youtube,broadcast_id,stream_id)
             return 'Sucessful'
         return 'Error'
 
