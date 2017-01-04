@@ -145,7 +145,7 @@ def bindBroadcast(youtube,broadcast_id,stream_id):
         bind_broadcast_response['id'],
         bind_broadcast_response['contentDetails']['boundStreamId'])
 
-def startBroadcast(youtube,broadcast_id,stream_id):
+def controlBroadcast(youtube,broadcast_id,stream_id,broadcast_status):
     stream_status = getLiveStreamStatusFromId(youtube,stream_id)
 
     if (stream_status != 'active'):
@@ -155,13 +155,19 @@ def startBroadcast(youtube,broadcast_id,stream_id):
     transition_broadcast_response = youtube.liveBroadcasts().transition(
         part='id,status',
         id=broadcast_id,
-        broadcastStatus='live'
+        broadcastStatus=broadcast_status
     ).execute()
 
     print 'Broadcast "%s" was transitioned to status "%s".' % (
         transition_broadcast_response['id'],
         transition_broadcast_response['status']['recordingStatus'])
-    
+
+def startBroadcast(youtube,broadcast_id,stream_id):
+    controlBroadcast(youtube,broadcast_id,stream_id,'live')
+
+def stopBroadcast(youtube,broadcast_id,stream_id):
+    controlBroadcast(youtube,broadcast_id,stream_id,'complete')
+
 #############################################################
 #########  Helpers to test basic API functionality  #########
 #############################################################

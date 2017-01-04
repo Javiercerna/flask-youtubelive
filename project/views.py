@@ -5,7 +5,8 @@ import httplib2
 from apiclient import discovery
 from oauth2client import client
 from youtubelive_api import getOrCreateBroadcastExample, getAllLiveStreams, \
-                     getLiveStream1080p, bindBroadcast, startBroadcast
+                     getLiveStream1080p, bindBroadcast, startBroadcast, \
+                     stopBroadcast
 from project import app, db
 from project.models import User
 import os
@@ -28,6 +29,7 @@ def mainInterface():
         if (stream_id != None):
             bindBroadcast(youtube,broadcast_id,stream_id)
             startBroadcast(youtube,broadcast_id,stream_id)
+            stopBroadcast(youtube,broadcast_id,stream_id)
             return 'Sucessful'
         return 'Error'
 
