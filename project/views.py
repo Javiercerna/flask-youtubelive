@@ -12,8 +12,19 @@ from project.models import User
 import os
 import json
 
+#############################################################
+#####################  Global variables  #################### 
+#############################################################
+
+youtube = None
+
+#############################################################
+#######################  Flask routes  ###################### 
+#############################################################
+
 @app.route('/')
 def mainInterface():
+    global youtube
     if ('credentials' not in session):
         return redirect(url_for('oauth2callback'))
     credentials = client.OAuth2Credentials.from_json(session['credentials'])
@@ -22,17 +33,30 @@ def mainInterface():
     else:
         http_auth = credentials.authorize(httplib2.Http())
         youtube = discovery.build('youtube','v3',http_auth)
-        broadcast_id = getOrCreateBroadcastExample(youtube)
+        session['broadcast_id'] = getOrCreateBroadcastExample(youtube)
         live_streams = getAllLiveStreams(youtube)
         # getLiveStream1080p only works with specific encoder brand
-        stream_id = getLiveStream1080p(live_streams)
-        if (stream_id != None):
-            bindBroadcast(youtube,broadcast_id,stream_id)
-            startBroadcast(youtube,broadcast_id,stream_id)
-            stopBroadcast(youtube,broadcast_id,stream_id)
-            return 'Sucessful'
+        session['stream_id'] = getLiveStream1080p(live_streams)
+        if (session['stream_id'] != None):
+            bindBroadcast(youtube,session['broadcast_id'],session['stream_id'])
+            startBroadcast(youtube,session['broadcast_id'],session['stream_id'])
+##            stopBroadcast(youtube,broadcast_id,stream_id)
+            return render_template('main.html')
         return 'Error'
 
+@app.route('/commands/',methods=['POST'])
+def handleCommands():
+    command = str(request.form['command']).strip()
+
+    if (command == 'start_broadcast'):
+        startBroadcast(youtube,session['broadcast_id'],session['stream_id'])
+        return 'Trying to start broadcast'
+    elif (command == 'stop_broadcast'):
+        stopBroadcast(youtube,session['broadcast_id'],session['stream_id'])
+        return 'Trying to stop broadcast'
+    else:
+        raise ValueError('Invalid command sent')
+    
 @app.route('/oauth2callback/')
 def oauth2callback():
     flow = client.flow_from_clientsecrets(
