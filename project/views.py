@@ -40,7 +40,7 @@ def mainInterface():
         if (session['stream_id'] != None):
             if (new_broadcast):
                 bindBroadcast(youtube,session['broadcast_id'],session['stream_id'])
-            return render_template('main.html')
+            return render_template('main.html',url=session['broadcast_id'])
         return 'Error'
 
 @app.route('/commands/',methods=['POST'])

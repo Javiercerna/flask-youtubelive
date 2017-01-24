@@ -10,6 +10,9 @@
   <button onclick="sendCommand('start_broadcast')">Start</button>
   <button onclick="sendCommand('stop_broadcast')">Stop</button>
 
+  <div>
+    <iframe style="width:800px;height:500px;"src="{{ 'https://www.youtube.com/embed/' + url + '?autoplay=1'}}" frameborder="0" id="live-video"></iframe>
+  </div>
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="{{url_for('static',filename='js/main.js')}}"></script>
