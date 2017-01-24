@@ -48,10 +48,10 @@ def handleCommands():
     command = str(request.form['command']).strip()
 
     if (command == 'start_broadcast'):
-        startBroadcast(youtube,session['broadcast_id'],session['stream_id'])
+        startBroadcast(youtube,session['broadcast_id'])
         return 'Trying to start broadcast'
     elif (command == 'stop_broadcast'):
-        stopBroadcast(youtube,session['broadcast_id'],session['stream_id'])
+        stopBroadcast(youtube,session['broadcast_id'])
         return 'Trying to stop broadcast'
     else:
         raise ValueError('Invalid command sent')

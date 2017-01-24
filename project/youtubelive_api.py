@@ -101,6 +101,20 @@ def getLiveStreamStatusFromId(youtube,stream_id):
         stream['id'],stream['snippet']['title'],stream['status']['streamStatus'])
     
     return stream['status']['streamStatus']
+
+def getBoundedStreamStatus(youtube,broadcast_id):
+    list_broadcasts_request = youtube.liveBroadcasts().list(
+        part='id,snippet,contentDetails',
+        id=broadcast_id,
+    )
+
+    list_broadcasts_response = list_broadcasts_request.execute()
+    broadcast = list_broadcasts_response['items'][0]
+    bounded_stream_id = broadcast['contentDetails']['boundStreamId']
+    print 'Broadcast "%s" with title "%s" has bounded stream "%s".' % (
+        broadcast['id'],broadcast['snippet']['title'],bounded_stream_id)
+
+    return getLiveStreamStatusFromId(youtube,bounded_stream_id)
     
 def getAllLiveStreams(youtube):
     live_streams = []
@@ -155,11 +169,11 @@ def bindBroadcast(youtube,broadcast_id,stream_id):
         bind_broadcast_response['id'],
         bind_broadcast_response['contentDetails']['boundStreamId'])
 
-def controlBroadcast(youtube,broadcast_id,stream_id,broadcast_status):
-    stream_status = getLiveStreamStatusFromId(youtube,stream_id)
-
-    if (stream_status != 'active'):
-        print 'The stream is %s. Cannot control broadcast' % (stream_status)
+def controlBroadcast(youtube,broadcast_id,broadcast_status):
+    bounded_stream_status = getBoundedStreamStatus(youtube,broadcast_id)
+    
+    if (bounded_stream_status != 'active'):
+        print 'The stream is %s. Cannot control broadcast' % (bounded_stream_status)
         return
     
     transition_broadcast_response = youtube.liveBroadcasts().transition(
@@ -172,11 +186,11 @@ def controlBroadcast(youtube,broadcast_id,stream_id,broadcast_status):
         transition_broadcast_response['id'],
         transition_broadcast_response['status']['recordingStatus'])
 
-def startBroadcast(youtube,broadcast_id,stream_id):
-    controlBroadcast(youtube,broadcast_id,stream_id,'live')
+def startBroadcast(youtube,broadcast_id):
+    controlBroadcast(youtube,broadcast_id,'live')
 
-def stopBroadcast(youtube,broadcast_id,stream_id):
-    controlBroadcast(youtube,broadcast_id,stream_id,'complete')
+def stopBroadcast(youtube,broadcast_id):
+    controlBroadcast(youtube,broadcast_id,'complete')
 
 #############################################################
 #########  Helpers to test basic API functionality  #########
