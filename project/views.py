@@ -39,7 +39,7 @@ def mainInterface():
         session['stream_id'] = getLiveStream1080p(live_streams)
         if (session['stream_id'] != None):
             bindBroadcast(youtube,session['broadcast_id'],session['stream_id'])
-            startBroadcast(youtube,session['broadcast_id'],session['stream_id'])
+##            startBroadcast(youtube,session['broadcast_id'],session['stream_id'])
 ##            stopBroadcast(youtube,broadcast_id,stream_id)
             return render_template('main.html')
         return 'Error'

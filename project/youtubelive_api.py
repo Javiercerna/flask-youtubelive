@@ -91,6 +91,8 @@ def getLiveStreamStatusFromId(youtube,stream_id):
     stream = list_streams_response['items'][0]
     print 'Stream "%s" with title "%s" has status "%s".' % (
         stream['id'],stream['snippet']['title'],stream['status']['streamStatus'])
+
+    return stream['status']['streamStatus']
     
 def getAllLiveStreams(youtube):
     live_streams = []
@@ -149,7 +151,7 @@ def controlBroadcast(youtube,broadcast_id,stream_id,broadcast_status):
     stream_status = getLiveStreamStatusFromId(youtube,stream_id)
 
     if (stream_status != 'active'):
-        print 'The stream is inactive. Cannot start broadcast'
+        print 'The stream is %s. Cannot control broadcast' % (stream_status)
         return
     
     transition_broadcast_response = youtube.liveBroadcasts().transition(
