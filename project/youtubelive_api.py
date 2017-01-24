@@ -39,11 +39,11 @@ def createBroadcast(youtube):
         broadcast_response['snippet']['publishedAt'])
     return broadcast_response['id']
 
-def getAllUpcomingBroadcasts(youtube):
-    upcoming_broadcasts = []
+def getAllBroadcastsFromStatus(youtube,status):
+    broadcasts = []
 
     list_broadcasts_request = youtube.liveBroadcasts().list(
-        broadcastStatus='upcoming',
+        broadcastStatus=status,
         part='id,snippet',
         maxResults=50
     )
@@ -52,15 +52,21 @@ def getAllUpcomingBroadcasts(youtube):
         list_broadcasts_response = list_broadcasts_request.execute()
 
         for broadcast in list_broadcasts_response.get('items',[]):
-            upcoming_broadcasts.append(broadcast)
+            broadcasts.append(broadcast)
 
         list_broadcasts_request = youtube.liveBroadcasts().list_next(
             list_broadcasts_request,list_broadcasts_response)
 
-    return upcoming_broadcasts
+    return broadcasts
 
-def getUpcomingBroadcastWithName(upcoming_broadcasts,name):
-    for broadcast in upcoming_broadcasts:
+def getAllUpcomingBroadcasts(youtube):
+    return getAllBroadcastsFromStatus(youtube,'upcoming')
+
+def getAllActiveBroadcasts(youtube):
+    return getAllBroadcastsFromStatus(youtube,'active')
+
+def getBroadcastWithName(broadcasts,name):
+    for broadcast in broadcasts:
         broadcast_name = broadcast['snippet']['title']
         if (broadcast_name == name):
             print 'Found broadcast "%s" with title "%s".' % (
@@ -69,17 +75,19 @@ def getUpcomingBroadcastWithName(upcoming_broadcasts,name):
     print 'No broadcasts where found.'
     return None
 
-def getUpcomingBroadcastExample(upcoming_broadcasts):
-    return getUpcomingBroadcastWithName(upcoming_broadcasts,DEFAULT_BROADCAST_TITLE)
+def getBroadcastExample(broadcasts):
+    return getBroadcastWithName(broadcasts,DEFAULT_BROADCAST_TITLE)
 
 def getOrCreateBroadcastExample(youtube):
-    upcoming_broadcasts = getAllUpcomingBroadcasts(youtube)
-    broadcast_example_id = getUpcomingBroadcastExample(upcoming_broadcasts)
+    broadcasts = getAllUpcomingBroadcasts(youtube)
+    broadcasts += getAllActiveBroadcasts(youtube)
+    broadcast_example_id = getBroadcastExample(broadcasts)
 
+    # Return broadcast id and new_broadcast boolean
     if (broadcast_example_id == None):
         broadcast_id = createBroadcast(youtube)
-        return broadcast_id
-    return broadcast_example_id
+        return [broadcast_id,True]
+    return [broadcast_example_id,False]
 
 def getLiveStreamStatusFromId(youtube,stream_id):
     list_streams_request = youtube.liveStreams().list(
@@ -91,7 +99,7 @@ def getLiveStreamStatusFromId(youtube,stream_id):
     stream = list_streams_response['items'][0]
     print 'Stream "%s" with title "%s" has status "%s".' % (
         stream['id'],stream['snippet']['title'],stream['status']['streamStatus'])
-
+    
     return stream['status']['streamStatus']
     
 def getAllLiveStreams(youtube):

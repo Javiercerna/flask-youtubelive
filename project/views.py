@@ -5,7 +5,7 @@ import httplib2
 from apiclient import discovery
 from oauth2client import client
 from youtubelive_api import getOrCreateBroadcastExample, getAllLiveStreams, \
-                     getLiveStream1080p, bindBroadcast, startBroadcast, \
+                     getLiveStream720p, bindBroadcast, startBroadcast, \
                      stopBroadcast
 from project import app, db
 from project.models import User
@@ -33,14 +33,13 @@ def mainInterface():
     else:
         http_auth = credentials.authorize(httplib2.Http())
         youtube = discovery.build('youtube','v3',http_auth)
-        session['broadcast_id'] = getOrCreateBroadcastExample(youtube)
+        session['broadcast_id'],new_broadcast = getOrCreateBroadcastExample(youtube)
         live_streams = getAllLiveStreams(youtube)
-        # getLiveStream1080p only works with specific encoder brand
-        session['stream_id'] = getLiveStream1080p(live_streams)
+        # getLiveStream720p only works with specific encoder brand
+        session['stream_id'] = getLiveStream720p(live_streams)
         if (session['stream_id'] != None):
-            bindBroadcast(youtube,session['broadcast_id'],session['stream_id'])
-##            startBroadcast(youtube,session['broadcast_id'],session['stream_id'])
-##            stopBroadcast(youtube,broadcast_id,stream_id)
+            if (new_broadcast):
+                bindBroadcast(youtube,session['broadcast_id'],session['stream_id'])
             return render_template('main.html')
         return 'Error'
 
